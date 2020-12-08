@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ssafy.housemap">
+	<select id="getsido" resultType="com.ssafy.web.dto.SidoGugunCode">
+		Select distinct sido_name as sidoName, left(sido_code, 2) as sidoCode From sidocode
+		ORDER BY sidoCode
+	</select>
+	
+	<select id="getguguninsido" parameterType="string" resultType="com.ssafy.web.dto.SidoGugunCode">
+        Select distinct gugun_name as gugunName, left(gugun_code, 5) as gugunCode From guguncode
+        where left(gugun_code,2) = #{sido}
+        ORDER BY gugunCode
+    </select>
+    
+    <select id="getdongingugun" parameterType="string" resultType="com.ssafy.web.dto.HouseInfo">
+    	SELECT distinct dong, code FROM houseinfo
+    	where code = #{gugun}
+    	ORDER BY dong
+    </select>
+    
+    <select id="getaptindong" parameterType="map" resultType="com.ssafy.web.dto.HouseInfo">
+    	SELECT * FROM houseinfo 
+    	WHERE code = #{code} and dong = #{dong}
+    	ORDER BY no
+    </select>
+    
+    <select id="getaptinname" parameterType="string" resultType="com.ssafy.web.dto.HouseInfo">
+    	SELECT * FROM houseinfo 
+    	WHERE aptName LIKE #{aptName}
+    	ORDER BY no
+    </select>
+    
+    <select id="gettotalcount" parameterType="string" resultType="integer">
+    	SELECT count(no) FROM houseinfo 
+    	WHERE dong = #{dong}
+    	order by no desc  	
+    </select>
+    
+    <select id="getaptdetail" parameterType="string" resultType="com.ssafy.web.dto.HouseInfo">
+    	SELECT * FROM houseinfo 
+    	WHERE no = #{no}
+    	ORDER BY no
+    </select>
+    
+    <select id="getdealdetail" parameterType="string" resultType="com.ssafy.web.dto.HouseDeal">
+    	
+    	select deal.* ,info.no as noInfo
+		from housedeal as deal
+		left outer join houseinfo as info
+		on deal.code=info.code and deal.aptName=info.aptName and deal.jibun=info.jibun
+		and deal.dealType=info.dealType and deal.dealType2=info.dealType2
+		where info.no=#{no}
+		ORDER BY deal.no desc;
+    	
+    </select>
+	
+	<insert id="insert" parameterType="map">
+		insert into interest (userid, no)
+		values (#{userid}, #{no})
+	</insert>
+	
+	<select id="getinter" parameterType="string" resultType="com.ssafy.web.dto.HouseInfo">
+		select h.*
+		from interest as i
+		join houseinfo as h
+		on i.no = h.no 
+		where i.userid = #{userid}
+	</select>
+	
+	<delete id="delete" parameterType="integer">
+		delete from interest
+		where no = #{no}
+	</delete>
+	
+	<select id="getgugun2" parameterType="string" resultType="string">
+		select distinct gugun_name as gugun from guguncode
+		where left(gugun_code,5)=#{code}
+	</select>
+	
+	<select id="getsido2" parameterType="string" resultType="string">
+		Select distinct city as si From baseaddress
+		where dongcode=#{code}
+	</select>
+	
+	<select id="getsido3" parameterType="string" resultType="string">
+		Select distinct sido_name as si From sidocode
+		where left(sido_code,2)=#{code}
+	</select>
+	
+	<select id="recodong" parameterType="map" resultType="com.ssafy.web.dto.Recojuso">
+		SELECT sido,gugun,dong,hospital,school,subway,movie,cafe,mart,fast,
+		sum((hospital*#{hospital})+(school*#{school})+(subway*#{subway})
+		+(movie*#{movie})+(cafe*#{cafe})+(mart*#{mart})+(fast*#{fast})) as score
+		from reco 
+		GROUP BY sido,gugun,dong
+		order by score desc
+		limit 3;
+	</select>
+	
+	<select id="recodong2" parameterType="map" resultType="com.ssafy.web.dto.Recojuso">
+		SELECT sido,gugun,dong,hospital,school,subway,movie,cafe,mart,fast,
+		sum((hospital*#{hospital})+(school*#{school})+(subway*#{subway})
+		+(movie*#{movie})+(cafe*#{cafe})+(mart*#{mart})+(fast*#{fast})) as score
+		from reco 
+		where sido = #{sido}
+		GROUP BY sido,gugun,dong
+		order by score desc
+		limit 3;
+	</select>
+	
+	<select id="recodong3" parameterType="map" resultType="com.ssafy.web.dto.Recojuso">
+		SELECT sido,gugun,dong,hospital,school,subway,movie,cafe,mart,fast,
+		sum((hospital*#{hospital})+(school*#{school})+(subway*#{subway})
+		+(movie*#{movie})+(cafe*#{cafe})+(mart*#{mart})+(fast*#{fast})) as score
+		from reco 
+		where sido = #{sido} and gugun = #{gugun}
+		GROUP BY sido,gugun,dong
+		order by score desc
+		limit 3;
+	</select>
+    
+</mapper>
